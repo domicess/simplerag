@@ -18,9 +18,9 @@ warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
 
 LLM_API_KEY = "sk"
-LLM_BASE_URL = "http://192.168.102.19:8082/v1"
+LLM_BASE_URL = "http://xxxxxxx:xxx/v1"
 LLM_MODEL_NAME = "qwen3"
-EMBEDDING_API_URL = "http://192.168.102.19:8082/v1/embeddings"
+EMBEDDING_API_URL = "http://xxxxxxx:xxx/v1/embeddings"
 EMBEDDING_MODEL_NAME = "qwen3-embedding"
 SPACY_MODEL = "zh_core_web_md"
 MAX_WORKERS = 16
@@ -128,4 +128,5 @@ def health_check():
     return {"status": "alive"}
 
 if __name__ == "__main__":
+
     uvicorn.run(app, host="0.0.0.0", port=12124)
