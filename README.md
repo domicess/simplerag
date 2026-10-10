@@ -10,11 +10,6 @@ SimpleRAG 是一个简洁、工程化的图增强检索（GraphRAG，Graph-enhan
 - 并发与增量索引：支持多 worker 并行处理与按知识库增量入库。
 - REST API：基于 FastAPI 提供索引、检索、删除与健康检查接口。
 
-## 与 LinearRAG 的差异
-
-1. 仅使用「段落—词」进行图建模，简化图结构。
-2. 将本地存储替换为工程化的图数据库（Neo4j）与向量数据库（Elasticsearch）。
-3. 增强高并发场景下的索引与检索能力。
 
 ## 技术栈
 
@@ -37,32 +32,32 @@ flowchart TB
     classDef build fill:#eaf2f8,stroke:#2980b9,stroke-width:2px,color:#154360;
     classDef store fill:#e8f8f5,stroke:#27ae60,stroke-width:2px,color:#145a32;
 
-    subgraph SRC["📥 输入"]
+    subgraph SRC["输入"]
         direction TB
-        A["📄 文本段落 passages"]
+        A["文本段落 passages"]
     end
 
-    subgraph EMB["🧮 向量化与入库"]
+    subgraph EMB["向量化与入库"]
         direction TB
-        B["段落向量化 Embedding<br/>batch_size = 128"] --> C[("🗄️ Elasticsearch<br/>段落向量入库 type=passage")]
+        B["段落向量化 Embedding<br/>batch_size = 128"] --> C[("Elasticsearch<br/>段落向量入库 type=passage")]
     end
 
-    subgraph NER["🔍 实体抽取"]
+    subgraph NER["实体抽取"]
         direction TB
         D["spaCy NER<br/>抽取命名实体（仅新文档）<br/>max_workers = 16"] --> E["实体向量化 Embedding"]
-        E --> F[("🗄️ Elasticsearch<br/>实体向量入库 type=entity")]
+        E --> F[("Elasticsearch<br/>实体向量入库 type=entity")]
     end
 
-    subgraph BUILD["🕸️ 图构建"]
+    subgraph BUILD["图构建"]
         direction TB
         G["构建「实体 — 段落」边"]
         H["构建「相邻段落」边<br/>LINK"]
         I["生成内存图 igraph"]
     end
 
-    subgraph STORE["💾 持久化"]
+    subgraph STORE["持久化"]
         direction TB
-        J[("🕸️ Neo4j<br/>增量子图批量写入")]
+        J[("Neo4j<br/>增量子图批量写入")]
     end
 
     A --> B
@@ -91,24 +86,24 @@ flowchart TB
     classDef gpath fill:#e8f8f5,stroke:#27ae60,stroke-width:2px,color:#145a32;
     classDef out fill:#f4ecf7,stroke:#8e44ad,stroke-width:2px,color:#4a235a;
 
-    subgraph QUERY["❓ 查询输入"]
+    subgraph QUERY["查询输入"]
         direction TB
         A["用户问题"]
     end
 
-    subgraph PREP["⚙️ 查询预处理"]
+    subgraph PREP["查询预处理"]
         direction TB
         B["编码问题向量<br/>Embedding + 检索指令前缀"]
         C["spaCy NER<br/>抽取问题实体"]
-        D[("🗄️ ES 实体向量检索<br/>逐实体匹配种子实体")]
+        D[("ES 实体向量检索<br/>逐实体匹配种子实体")]
     end
 
-    subgraph ROUTE["🔀 路由决策"]
+    subgraph ROUTE["路由决策"]
         direction TB
         E{命中种子实体?}
     end
 
-    subgraph GRAPH["🕸️ 图检索路径"]
+    subgraph GRAPH["图检索路径"]
         direction TB
         F["Neo4j 多跳实体扩散<br/>实体分数衰减传播"]
         G["ES 段落向量初检 + 实体加成<br/>0.6 × 向量分 + ln(1+实体分)"]
@@ -116,14 +111,14 @@ flowchart TB
         I["分数融合与截断<br/>0.5 × 基础分 + 0.5 × PR<br/>Top-K 后回查 ES 详情"]
     end
 
-    subgraph FALL["📚 向量检索降级路径"]
+    subgraph FALL["向量检索降级路径"]
         direction TB
         J["ES 段落 KNN 检索<br/>num_candidates = 100"]
     end
 
-    subgraph OUT["📤 输出"]
+    subgraph OUT["输出"]
         direction TB
-        K["📄 返回相关段落列表"]
+        K["返回相关段落列表"]
     end
 
     A --> B
